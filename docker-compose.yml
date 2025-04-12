@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  quiz-db:
+    container_name: quiz-postgres
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: quizdb
+      PGDATA: /data/postgres
+    volumes:
+      - quiz-db-data:/data/postgres
+    ports:
+      - "5433:5432" # <--- Changed external port to avoid conflict
+    networks:
+      - quiz-net
+    restart: unless-stopped
+
+networks:
+  quiz-net:
+    driver: bridge
+
+volumes:
+  quiz-db-data:
