@@ -1,6 +1,7 @@
 package com.quizapp;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 public class Question {
@@ -10,24 +11,23 @@ public class Question {
     private Long id;
 
     private String question;
-
     private String answer;
 
     @ManyToOne
     @JoinColumn(name = "quiz_id")
+    @JsonBackReference
     private Quiz quiz;
 
-    // === Constructors ===
+    // Constructors
+    public Question() {}
 
-    public Question() {
-    }
-
-    public Question(String question, String answer) {
+    public Question(String question, String answer, Quiz quiz) {
         this.question = question;
         this.answer = answer;
+        this.quiz = quiz;
     }
 
-    // === Getters and Setters ===
+    // Getters and Setters
 
     public Long getId() {
         return id;
@@ -44,11 +44,6 @@ public class Question {
     public void setQuestion(String question) {
         this.question = question;
     }
-
-    // when using setters this.question = question
-    // getters just retun
-
-
 
     public String getAnswer() {
         return answer;

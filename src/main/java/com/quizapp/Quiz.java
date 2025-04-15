@@ -1,6 +1,8 @@
 package com.quizapp;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import java.util.List;
 
 @Entity
@@ -14,47 +16,40 @@ public class Quiz {
     private String name;
 
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Question> questions;
 
-    // === Constructors ===
-
-    public Quiz() {
-    }
+    // Constructors
+    public Quiz() {}
 
     public Quiz(String name, List<Question> questions) {
         this.name = name;
         this.questions = questions;
-        for (Question q : questions) {
-            q.setQuiz(this); // Ensure bidirectional link is set
-        }
     }
 
-    // === Getters and Setters ===
+    // Getters and Setters
 
     public Long getId() {
         return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public List<Question> getQuestions() {
         return questions;
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
-        for (Question q : questions) {
-            q.setQuiz(this); // Maintain bidirectional relationship
-        }
     }
 }
