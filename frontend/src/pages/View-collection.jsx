@@ -1,62 +1,77 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const ViewCollection = () => {
   const [collection, setCollection] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
+  const [error, setError] = useState('');
   const navigate = useNavigate();
   const { id } = useParams();
 
   useEffect(() => {
+    console.log('📦 Loading collection:', id);
+
     fetch(`http://localhost:8000/api/collections/${id}`)
-      .then(res => res.json())
-      .then(data => setCollection(data))
-      .catch(err => console.error('Error loading collection:', err));
+      .then(res => {
+        if (!res.ok) throw new Error(`Collection fetch failed: ${res.status}`);
+        return res.json();
+      })
+      .then(data => {
+        console.log('✅ Collection loaded:', data);
+        setCollection(data);
+      })
+      .catch(err => {
+        console.error('❌ Collection load error:', err);
+        setError('Could not load collection.');
+      });
 
     fetch('http://localhost:8000/api/quizzes')
       .then(res => res.json())
-      .then(data => setQuizzes(data))
-      .catch(err => console.error('Error loading quizzes:', err));
+      .then(data => {
+        console.log('✅ Quizzes loaded:', data);
+        setQuizzes(data);
+      })
+      .catch(err => console.error('❌ Quiz fetch error:', err));
   }, [id]);
 
-  const handleBack = () => {
-    navigate('/collections');
-  };
+  const handleBack = () => navigate('/collections');
 
-  const handleTestQuiz = (quizId) => {
-    navigate(`/test?quizId=${quizId}`);
-  };
+  const handleTest = (quizId) => navigate(`/test?quizId=${quizId}`);
 
-  if (!collection) {
-    return <Container><Header><h1>Collection Not Found</h1><Back onClick={handleBack}>Back to Collections</Back></Header></Container>;
-  }
+  if (error) return <Container><p>{error}</p></Container>;
+  if (!collection) return <Container><p>Loading collection...</p></Container>;
 
   return (
     <Container>
       <Header>
         <h1>{collection.name}</h1>
-        <Back onClick={handleBack}>Back to Collections</Back>
+        <BackButton onClick={handleBack}>← Back to Collections</BackButton>
       </Header>
-      <Main>
-        {collection.quizzes.length > 0 ? (
-          collection.quizzes.map(quizId => {
-            const quiz = quizzes.find(q => q.id === parseInt(quizId));
+
+      <QuizList>
+        {collection.quizzes?.length > 0 ? (
+          collection.quizzes.map((quizId) => {
+            const quiz = quizzes.find(q => q.id === quizId);
             if (!quiz) return null;
+
             return (
-              <QuizItem key={quiz.id}>
-                <strong>{quiz.name}</strong>
+              <QuizBox key={quiz.id}>
+                <h3>{quiz.name}</h3>
                 {quiz.questions.map((q, i) => (
-                  <div key={i}><strong>Q{i + 1}:</strong> {q.question}<br /><strong>Answer:</strong> {q.answer}</div>
+                  <div key={i}>
+                    <strong>Q{i + 1}:</strong> {q.question} <br />
+                    <strong>Answer:</strong> {q.answer}
+                  </div>
                 ))}
-                <TestButton onClick={() => handleTestQuiz(quiz.id)}>Test Quiz Now</TestButton>
-              </QuizItem>
+                <TestButton onClick={() => handleTest(quiz.id)}>Test Now</TestButton>
+              </QuizBox>
             );
           })
         ) : (
           <p>No quizzes in this collection.</p>
         )}
-      </Main>
+      </QuizList>
     </Container>
   );
 };
@@ -151,5 +166,39 @@ const TestButton = styled.button`
     background: #91003a;
     transform: scale(1.05);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+  }
+`;
+
+const SaveButton = styled.button`
+  background: #28a745;
+  color: white;
+  padding: 14px 28px;
+  font-size: 1.2rem;
+  border: none;
+  border-radius: 8px;
+  margin-top: 20px;
+  cursor: pointer;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+
+  &:hover {
+    background: #218838;
+    transform: scale(1.05);
+  }
+`;
+
+const QuizList = styled.div`
+  margin-top: 20px;
+  padding: 10px;
+  background: #f1f1f1;
+  border-radius: 10px;
+
+  label {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+  }
+
+  input[type="checkbox"] {
+    margin-right: 10px;
   }
 `;
