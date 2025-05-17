@@ -206,3 +206,4 @@ const CreateQuiz = () => {
 };
 
 export default CreateQuiz;
+

@@ -5,10 +5,12 @@ import MyQuizzes from './pages/MyQuizzes';
 import Test from './pages/Test';
 import MCQQuizWithResult from './pages/MCQQuizWithResult';
 import Home from './pages/Home';
+import ViewCollection from './pages/ViewCollection';
 import Flashcards from './pages/Flashcards';
-import Collections from './pages/Collections';
-import ViewCollection from './pages/view-collection';
+
+
 import Sidebar from './components/Sidebar';
+import CreateCollection from './pages/CreateCollection';
 
 function App() {
   return (
@@ -20,9 +22,9 @@ function App() {
         <Route path="/my-quizzes" element={<MyQuizzes />} />
         <Route path="/test" element={<Test />} />
         <Route path="/mcq" element={<MCQQuizWithResult />} />
+        <Route path="/collections/:id" element={<ViewCollection />} />
         <Route path="/flashcards" element={<Flashcards />} />
-        <Route path="/collections" element={<Collections />} />
-        <Route path="/view-collection/:id" element={<view-collection />} />
+        <Route path="/createcollection" element={<CreateCollection />} />
       </Routes>
     </Router>
   );

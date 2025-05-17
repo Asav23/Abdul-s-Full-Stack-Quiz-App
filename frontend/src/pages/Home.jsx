@@ -110,7 +110,8 @@ const Home = () => {
         <Button href="/my-quizzes">My Quizzes</Button>
         <Button href="/create-quiz">Create Quiz</Button>
         <Button href="/Flashcards">Flashcards</Button>
-        <Button href="/collections">My Collections</Button>
+        <Button href="/CreateCollection">CreateCollection</Button>
+
       </ButtonContainer>
 
       <Welcome>Welcome, Guest!</Welcome>
