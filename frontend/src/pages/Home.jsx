@@ -111,6 +111,7 @@ const Home = () => {
         <Button href="/create-quiz">Create Quiz</Button>
         <Button href="/Flashcards">Flashcards</Button>
         <Button href="/CreateCollection">CreateCollection</Button>
+        <Button href="viewCollection">viewCollection</Button>
 
       </ButtonContainer>
 
