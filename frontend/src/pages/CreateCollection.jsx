@@ -41,7 +41,7 @@ const QuizItem = styled.div`
   margin-bottom: 8px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
 `;
 
 const Button = styled.button`
@@ -230,7 +230,17 @@ const CreateCollection = () => {
                 const quiz = quizzes.find((q) => q.id === qid);
                 return quiz ? (
                   <QuizItem key={qid}>
-                    {quiz.name}
+                    <div style={{ flex: 1 }}>
+                      <strong>{quiz.name}</strong>
+                      <ul style={{ marginTop: '8px' }}>
+                        {quiz.questions?.map((q, i) => (
+                          <li key={i} style={{ marginBottom: '6px' }}>
+                            <div><strong>Q:</strong> {q.question}</div>
+                            <div><strong>A:</strong> {q.answer}</div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                     <DangerButton onClick={() => removeQuizFromCollection(col.id, qid)}>
                       Remove
                     </DangerButton>
