@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Frontend dependencies and build artifacts
+/frontend/node_modules/
+/frontend/build/
+/frontend/.cache/
