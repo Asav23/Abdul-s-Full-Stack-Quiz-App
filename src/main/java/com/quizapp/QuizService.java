@@ -1,10 +1,8 @@
 package com.quizapp;
 
-
-
 import com.quizapp.Quiz;
+import com.quizapp.Question;
 import com.quizapp.QuizRepository;
-
 
 import org.springframework.stereotype.Service;
 
@@ -26,11 +24,14 @@ return quizRepository.findAll();
 }
 
 
-public void createquiz( Quiz quiz      ){
-        quizRepository.save(quiz);
-
-
-
+public Quiz createquiz(Quiz quiz) {
+    // Set the quiz reference for each question
+    if (quiz.getQuestions() != null) {
+        for (Question question : quiz.getQuestions()) {
+            question.setQuiz(quiz);
+        }
+    }
+    return quizRepository.save(quiz);
 }
 
 

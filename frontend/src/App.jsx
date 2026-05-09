@@ -7,8 +7,8 @@ import MCQQuizWithResult from './pages/MCQQuizWithResult';
 import Home from './pages/Home';
 import Flashcards from './pages/Flashcards';
 import Collections from './pages/Collections';
-import ViewCollection from './pages/view-collection';
-import Sidebar from './components/Sidebar';
+import ViewCollection from './pages/View-collection';
+import Sidebar from './Components/Sidebar';
 
 function App() {
   return (
@@ -22,7 +22,7 @@ function App() {
         <Route path="/mcq" element={<MCQQuizWithResult />} />
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/collections" element={<Collections />} />
-        <Route path="/view-collection/:id" element={<view-collection />} />
+        <Route path="/view-collection/:id" element={<ViewCollection />} />
       </Routes>
     </Router>
   );

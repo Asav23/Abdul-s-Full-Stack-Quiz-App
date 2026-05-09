@@ -12,7 +12,33 @@ services:
     volumes:
       - quiz-db-data:/data/postgres
     ports:
-      - "5433:5432" # <--- Changed external port to avoid conflict
+      - "5433:5432"
+    networks:
+      - quiz-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  quiz-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quiz-backend
+    ports:
+      - "8000:8000"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://quiz-db:5432/quizdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+    depends_on:
+      quiz-db:
+        condition: service_healthy
     networks:
       - quiz-net
     restart: unless-stopped

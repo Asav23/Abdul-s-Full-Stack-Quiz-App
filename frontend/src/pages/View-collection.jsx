@@ -46,17 +46,17 @@ const ViewCollection = () => {
     <Container>
       <Header>
         <h1>{collection.name}</h1>
-        <BackButton onClick={handleBack}>← Back to Collections</BackButton>
+        <Back onClick={handleBack}>← Back to Collections</Back>
       </Header>
 
-      <QuizList>
+      <Main>
         {collection.quizzes?.length > 0 ? (
           collection.quizzes.map((quizId) => {
             const quiz = quizzes.find(q => q.id === quizId);
             if (!quiz) return null;
 
             return (
-              <QuizBox key={quiz.id}>
+              <QuizItem key={quiz.id}>
                 <h3>{quiz.name}</h3>
                 {quiz.questions.map((q, i) => (
                   <div key={i}>
@@ -65,13 +65,13 @@ const ViewCollection = () => {
                   </div>
                 ))}
                 <TestButton onClick={() => handleTest(quiz.id)}>Test Now</TestButton>
-              </QuizBox>
+              </QuizItem>
             );
           })
         ) : (
           <p>No quizzes in this collection.</p>
         )}
-      </QuizList>
+      </Main>
     </Container>
   );
 };
