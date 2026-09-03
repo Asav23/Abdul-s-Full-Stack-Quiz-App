@@ -1,46 +1,82 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useParams, useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
+
+const MAX_QUIZZES_PER_COLLECTION = 7;
 
 const ViewCollection = () => {
   const [collection, setCollection] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [error, setError] = useState('');
+  const [selectedQuizId, setSelectedQuizId] = useState('');
   const navigate = useNavigate();
   const { id } = useParams();
 
-  useEffect(() => {
-    console.log('📦 Loading collection:', id);
-
-    fetch(`http://localhost:8000/api/collections/${id}`)
+  const loadCollection = () => {
+    fetch(`${API_BASE_URL}/api/collections/${id}`)
       .then(res => {
         if (!res.ok) throw new Error(`Collection fetch failed: ${res.status}`);
         return res.json();
       })
-      .then(data => {
-        console.log('✅ Collection loaded:', data);
-        setCollection(data);
-      })
+      .then(data => setCollection(data))
       .catch(err => {
-        console.error('❌ Collection load error:', err);
+        console.error('Collection load error:', err);
         setError('Could not load collection.');
       });
+  };
 
-    fetch('http://localhost:8000/api/quizzes')
+  useEffect(() => {
+    loadCollection();
+
+    fetch(`${API_BASE_URL}/api/quizzes`)
       .then(res => res.json())
-      .then(data => {
-        console.log('✅ Quizzes loaded:', data);
-        setQuizzes(data);
-      })
-      .catch(err => console.error('❌ Quiz fetch error:', err));
+      .then(data => setQuizzes(data))
+      .catch(err => console.error('Quiz fetch error:', err));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const handleBack = () => navigate('/collections');
 
   const handleTest = (quizId) => navigate(`/test?quizId=${quizId}`);
 
+  const handlePlayAll = () => navigate(`/collection-test/${id}`);
+
+  const handleAddQuiz = () => {
+    if (!selectedQuizId) return;
+    fetch(`${API_BASE_URL}/api/collections/${id}/quizzes/${selectedQuizId}`, {
+      method: 'POST',
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          throw new Error(body.error || 'Failed to add quiz to collection');
+        }
+        setSelectedQuizId('');
+        loadCollection();
+      })
+      .catch(err => alert(err.message));
+  };
+
+  const handleRemoveQuiz = (quizId) => {
+    fetch(`${API_BASE_URL}/api/collections/${id}/quizzes/${quizId}`, {
+      method: 'DELETE',
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to remove quiz from collection');
+        loadCollection();
+      })
+      .catch(err => alert(err.message));
+  };
+
   if (error) return <Container><p>{error}</p></Container>;
   if (!collection) return <Container><p>Loading collection...</p></Container>;
+
+  const collectionQuizzes = collection.quizzes
+    .map(quizId => quizzes.find(q => q.id === quizId))
+    .filter(Boolean);
+  const availableQuizzes = quizzes.filter(q => !collection.quizzes.includes(q.id));
+  const atLimit = collectionQuizzes.length >= MAX_QUIZZES_PER_COLLECTION;
 
   return (
     <Container>
@@ -50,24 +86,41 @@ const ViewCollection = () => {
       </Header>
 
       <Main>
-        {collection.quizzes?.length > 0 ? (
-          collection.quizzes.map((quizId) => {
-            const quiz = quizzes.find(q => q.id === quizId);
-            if (!quiz) return null;
+        {collectionQuizzes.length > 0 && (
+          <TestButton onClick={handlePlayAll}>Play All Quizzes</TestButton>
+        )}
 
-            return (
-              <QuizItem key={quiz.id}>
-                <h3>{quiz.name}</h3>
-                {quiz.questions.map((q, i) => (
-                  <div key={i}>
-                    <strong>Q{i + 1}:</strong> {q.question} <br />
-                    <strong>Answer:</strong> {q.answer}
-                  </div>
+        <QuizList>
+          <label>{collectionQuizzes.length} / {MAX_QUIZZES_PER_COLLECTION} quizzes</label>
+          {atLimit ? (
+            <p>Collection is full.</p>
+          ) : (
+            <div>
+              <select value={selectedQuizId} onChange={(e) => setSelectedQuizId(e.target.value)}>
+                <option value="">Select a quiz to add...</option>
+                {availableQuizzes.map(q => (
+                  <option key={q.id} value={q.id}>{q.name}</option>
                 ))}
-                <TestButton onClick={() => handleTest(quiz.id)}>Test Now</TestButton>
-              </QuizItem>
-            );
-          })
+              </select>
+              <SaveButton type="button" onClick={handleAddQuiz}>Add Quiz</SaveButton>
+            </div>
+          )}
+        </QuizList>
+
+        {collectionQuizzes.length > 0 ? (
+          collectionQuizzes.map((quiz) => (
+            <QuizItem key={quiz.id}>
+              <h3>{quiz.name}</h3>
+              {quiz.questions.map((q, i) => (
+                <div key={i}>
+                  <strong>Q{i + 1}:</strong> {q.question} <br />
+                  <strong>Answer:</strong> {q.answer}
+                </div>
+              ))}
+              <TestButton onClick={() => handleTest(quiz.id)}>Test Now</TestButton>
+              <Back onClick={() => handleRemoveQuiz(quiz.id)}>Remove from Collection</Back>
+            </QuizItem>
+          ))
         ) : (
           <p>No quizzes in this collection.</p>
         )}

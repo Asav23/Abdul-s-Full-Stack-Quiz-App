@@ -10,6 +10,8 @@ import java.util.List;
 
 @Service
 public class QuizService {
+    public static final int MAX_QUESTIONS_PER_QUIZ = 35;
+
     private final QuizRepository quizRepository;
 
     public QuizService(QuizRepository quizRepository){
@@ -25,6 +27,7 @@ return quizRepository.findAll();
 
 
 public Quiz createquiz(Quiz quiz) {
+    validateQuestionCount(quiz);
     // Set the quiz reference for each question
     if (quiz.getQuestions() != null) {
         for (Question question : quiz.getQuestions()) {
@@ -32,6 +35,12 @@ public Quiz createquiz(Quiz quiz) {
         }
     }
     return quizRepository.save(quiz);
+}
+
+private void validateQuestionCount(Quiz quiz) {
+    if (quiz.getQuestions() != null && quiz.getQuestions().size() > MAX_QUESTIONS_PER_QUIZ) {
+        throw new IllegalArgumentException("A quiz can have at most " + MAX_QUESTIONS_PER_QUIZ + " questions");
+    }
 }
 
 
@@ -47,6 +56,7 @@ public void deletequiz(Long id){
 
 
 public void updatequiz(Long id, Quiz updateQuiz){
+validateQuestionCount(updateQuiz);
 Quiz quiz = getQuizById(id);
 quiz.setName(updateQuiz.getName());
 quiz.setQuestions(updateQuiz.getQuestions());

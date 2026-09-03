@@ -8,6 +8,7 @@ import Home from './pages/Home';
 import Flashcards from './pages/Flashcards';
 import Collections from './pages/Collections';
 import ViewCollection from './pages/View-collection';
+import CollectionTest from './pages/CollectionTest';
 import Sidebar from './Components/Sidebar';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/flashcards" element={<Flashcards />} />
         <Route path="/collections" element={<Collections />} />
         <Route path="/view-collection/:id" element={<ViewCollection />} />
+        <Route path="/collection-test/:collectionId" element={<CollectionTest />} />
       </Routes>
     </Router>
   );

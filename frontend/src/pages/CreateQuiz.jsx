@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { API_BASE_URL } from '../api';
 
 const PageWrapper = styled.div`
   display: flex;
@@ -106,11 +107,14 @@ const Numbering = styled.div`
   margin-bottom: 5px;
 `;
 
+const MAX_QUESTIONS = 35;
+
 const CreateQuiz = () => {
   const [quizName, setQuizName] = useState('');
   const [questions, setQuestions] = useState([{ question: '', answer: '' }]);
 
   const handleAddQuestion = () => {
+    if (questions.length >= MAX_QUESTIONS) return;
     setQuestions([...questions, { question: '', answer: '' }]);
   };
 
@@ -146,7 +150,7 @@ const CreateQuiz = () => {
     };
 
     try {
-      const res = await fetch('http://localhost:8000/api/quizzes', {
+      const res = await fetch(`${API_BASE_URL}/api/quizzes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(quiz),
@@ -195,7 +199,10 @@ const CreateQuiz = () => {
             </QuestionBlock>
           ))}
 
-          <Button type="button" onClick={handleAddQuestion}>Add Question</Button>
+          <Numbering>{questions.length} / {MAX_QUESTIONS} questions</Numbering>
+          {questions.length < MAX_QUESTIONS && (
+            <Button type="button" onClick={handleAddQuestion}>Add Question</Button>
+          )}
           <Button type="submit">Save Quiz</Button>
         </StyledForm>
 
