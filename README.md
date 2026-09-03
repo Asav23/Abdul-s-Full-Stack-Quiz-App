@@ -1,3 +1,6 @@
+Quizzer
+
+
 A full-stack, production-deployed quiz application for learners and educators, featuring multiple study modes and a clean, responsive interface.
 
 Features
