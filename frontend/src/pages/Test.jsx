@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { API_BASE_URL } from '../api';
 
 const Page = styled.div`
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -131,7 +132,7 @@ const Test = () => {
   const quizId = new URLSearchParams(location.search).get('quizId');
 
   useEffect(() => {
-    fetch(`http://localhost:8000/api/quizzes/${quizId}`)
+    fetch(`${API_BASE_URL}/api/quizzes/${quizId}`)
       .then(res => res.json())
       .then(data => {
         setQuiz(data);

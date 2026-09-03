@@ -23,3 +23,15 @@ Clean separation of concerns across the data, service, and API layers
 Centralized configuration for CORS, database connectivity, and error handling
 Fully containerized with Docker for consistent, portable deployment
 Production-ready via Spring Boot actuators, profiles, and logging
+
+Run it yourself
+
+Requires only Docker and Docker Compose - no local Java, Maven, or Node install needed.
+
+    git clone <this-repo-url>
+    cd Abdul-s-Full-Stack-Quiz-App
+    docker-compose up --build
+
+Then open http://localhost:3000 in a browser. Quizzes are stored in a Postgres database in a Docker volume, so they persist across restarts (`docker-compose down` keeps the data, `docker-compose down -v` wipes it).
+
+The backend API is reachable directly at http://localhost:8080/api/quizzes, and its health check at http://localhost:8080/actuator/health.

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { API_BASE_URL } from '../api';
 
 const QuizContainer = styled.div`
   display: flex;
@@ -163,7 +164,7 @@ const MyQuizzes = () => {
 
   const fetchQuizzes = async () => {
     try {
-      const res = await fetch('http://localhost:8000/api/quizzes');
+      const res = await fetch(`${API_BASE_URL}/api/quizzes`);
       const data = await res.json();
       setQuizzes(data.reverse());
     } catch (error) {
@@ -173,7 +174,7 @@ const MyQuizzes = () => {
 
   const deleteQuiz = async (id) => {
     try {
-      await fetch(`http://localhost:8000/api/quizzes/${id}`, {
+      await fetch(`${API_BASE_URL}/api/quizzes/${id}`, {
         method: 'DELETE',
       });
       fetchQuizzes();

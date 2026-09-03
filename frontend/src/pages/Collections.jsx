@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 
 const Collections = () => {
   const [collections, setCollections] = useState([]);
@@ -8,7 +9,7 @@ const Collections = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/collections')
+    fetch(`${API_BASE_URL}/api/collections`)
       .then(res => res.json())
       .then(data => setCollections(data))
       .catch(err => console.error('Error loading collections:', err));
@@ -17,7 +18,7 @@ const Collections = () => {
   const handleAddCollection = () => {
     if (!name.trim()) return alert('Enter a collection name');
 
-    fetch('http://localhost:8000/api/collections', {
+    fetch(`${API_BASE_URL}/api/collections`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })

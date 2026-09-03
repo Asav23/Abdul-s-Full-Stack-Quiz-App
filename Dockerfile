@@ -1,14 +1,14 @@
-# Use official Java 21 runtime as base image
-FROM eclipse-temurin:21-jre-alpine
-
-# Set working directory
+# Build stage
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY pom.xml .
+RUN mvn -B dependency:go-offline
+COPY src ./src
+RUN mvn -B clean package -DskipTests
 
-# Copy the built JAR file from the target directory
-COPY target/quiz-backend-0.0.1-SNAPSHOT.jar app.jar
-
-# Expose port 8000
+# Runtime stage
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/quiz-backend-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8000
-
-# Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]

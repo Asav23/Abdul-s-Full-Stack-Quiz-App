@@ -1,5 +1,6 @@
 package com.quizapp;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -8,6 +9,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @SpringBootApplication
 public class QuizBackendApplication {
+
+	@Value("${app.cors.allowed-origins:*}")
+	private String allowedOrigins;
 
 	public static void main(String[] args) {
 		SpringApplication.run(QuizBackendApplication.class, args);
@@ -19,7 +23,7 @@ public class QuizBackendApplication {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-						.allowedOrigins("http://localhost:5173") // React dev server
+						.allowedOriginPatterns(allowedOrigins.split(","))
 						.allowedMethods("GET", "POST", "PUT", "DELETE")
 						.allowedHeaders("*");
 			}

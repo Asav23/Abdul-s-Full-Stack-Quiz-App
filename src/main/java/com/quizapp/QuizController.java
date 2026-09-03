@@ -8,8 +8,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/quizzes")
-@CrossOrigin(origins = "*") // Allow requests from any origin (adjust as needed)
-
 public class QuizController {
 
     private final QuizService quizService;

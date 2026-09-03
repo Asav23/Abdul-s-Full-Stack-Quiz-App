@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { API_BASE_URL } from '../api';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(-20px); }
@@ -127,7 +128,7 @@ const MCQQuizWithResults = () => {
       return;
     }
 
-    fetch(`http://localhost:8000/api/quizzes/${quizId}`)
+    fetch(`${API_BASE_URL}/api/quizzes/${quizId}`)
       .then(res => {
         if (!res.ok) throw new Error('Failed to fetch quiz');
         return res.json();
