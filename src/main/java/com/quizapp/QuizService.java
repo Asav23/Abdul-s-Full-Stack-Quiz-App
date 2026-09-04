@@ -13,9 +13,11 @@ public class QuizService {
     public static final int MAX_QUESTIONS_PER_QUIZ = 35;
 
     private final QuizRepository quizRepository;
+    private final CollectionRepository collectionRepository;
 
-    public QuizService(QuizRepository quizRepository){
+    public QuizService(QuizRepository quizRepository, CollectionRepository collectionRepository){
        this.quizRepository = quizRepository;
+       this.collectionRepository = collectionRepository;
     }
 
 
@@ -45,11 +47,18 @@ private void validateQuestionCount(Quiz quiz) {
 
 
 public void deletequiz(Long id){
+    Quiz quiz = getQuizById(id);
 
+    // A quiz can belong to collections via the collection_quizzes join table;
+    // deleting it outright would violate that foreign key, so drop its
+    // membership from any collection first.
+    List<Collection> collections = collectionRepository.findByQuizzesContaining(quiz);
+    for (Collection collection : collections) {
+        collection.getQuizzes().removeIf(q -> q.getId().equals(id));
+    }
+    collectionRepository.saveAll(collections);
 
-        quizRepository.deleteById(id);
-
-
+    quizRepository.deleteById(id);
 }
 
 
