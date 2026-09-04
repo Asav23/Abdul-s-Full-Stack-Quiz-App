@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { API_BASE_URL } from '../api';
+import { shuffleArray } from '../shuffle';
 
 const fadeIn = keyframes`
   from { opacity: 0; transform: translateY(-20px); }
@@ -112,6 +113,7 @@ const QuitButton = styled(ControlButton)`
 `;
 
 const MCQQuizWithResults = () => {
+  const [rawQuestions, setRawQuestions] = useState(null);
   const [quiz, setQuiz] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState([]);
@@ -121,6 +123,35 @@ const MCQQuizWithResults = () => {
   const location = useLocation();
 
   const quizId = new URLSearchParams(location.search).get('quizId');
+
+  const getRandomOptions = (questions, correctAnswer) => {
+    const pool = questions.map(q => q.answer).filter(a => a !== correctAnswer);
+    return shuffleArray([...new Set(pool)]).slice(0, 3);
+  };
+
+  const startRound = (name, questions) => {
+    const formatted = shuffleArray(questions).map((q) => {
+      const uniqueOptions = shuffleArray([
+        q.answer,
+        ...getRandomOptions(questions, q.answer),
+      ]);
+
+      while (uniqueOptions.length < 4) {
+        uniqueOptions.push(`Option ${uniqueOptions.length + 1}`);
+      }
+
+      return {
+        question: q.question,
+        options: uniqueOptions.slice(0, 4),
+        correctAnswer: q.answer
+      };
+    });
+
+    setQuiz({ name, questions: formatted });
+    setUserAnswers(Array(formatted.length).fill(''));
+    setCurrentIndex(0);
+    setResults(null);
+  };
 
   useEffect(() => {
     if (!quizId) {
@@ -139,38 +170,15 @@ const MCQQuizWithResults = () => {
           return;
         }
 
-        const formatted = data.questions.map((q, i) => {
-          const uniqueOptions = shuffleArray([
-            q.answer,
-            ...getRandomOptions(data.questions, q.answer),
-          ]);
-
-          while (uniqueOptions.length < 4) {
-            uniqueOptions.push(`Option ${uniqueOptions.length + 1}`);
-          }
-
-          return {
-            question: q.question,
-            options: uniqueOptions.slice(0, 4),
-            correctAnswer: q.answer
-          };
-        });
-
-        setQuiz({ name: data.name, questions: formatted });
-        setUserAnswers(Array(formatted.length).fill(''));
+        setRawQuestions(data.questions);
+        startRound(data.name, data.questions);
       })
       .catch(err => {
         console.error('Error loading quiz:', err);
         setError('Failed to load quiz.');
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizId]);
-
-  const shuffleArray = arr => [...arr].sort(() => Math.random() - 0.5);
-
-  const getRandomOptions = (questions, correctAnswer) => {
-    const pool = questions.map(q => q.answer).filter(a => a !== correctAnswer);
-    return shuffleArray([...new Set(pool)]).slice(0, 3);
-  };
 
   const handleOptionSelect = val => {
     const updated = [...userAnswers];
@@ -190,9 +198,7 @@ const MCQQuizWithResults = () => {
   };
 
   const retryQuiz = () => {
-    setResults(null);
-    setCurrentIndex(0);
-    setUserAnswers(Array(quiz.questions.length).fill(''));
+    startRound(quiz.name, rawQuestions);
   };
 
   if (error) return <Page><p>{error}</p></Page>;

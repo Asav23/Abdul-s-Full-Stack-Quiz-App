@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { API_BASE_URL } from '../api';
+import { shuffleArray } from '../shuffle';
 
 const Page = styled.div`
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -156,15 +157,6 @@ const FlashcardTest = () => {
       .catch(() => navigate('/flashcards'));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizId]);
-
-  const shuffleArray = (arr) => {
-    const copy = [...arr];
-    for (let i = copy.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [copy[i], copy[j]] = [copy[j], copy[i]];
-    }
-    return copy;
-  };
 
   const handleChange = (val) => {
     const copy = [...answers];

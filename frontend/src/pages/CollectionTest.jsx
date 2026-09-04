@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { API_BASE_URL } from '../api';
+import { shuffleArray } from '../shuffle';
 
 const Page = styled.div`
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -166,7 +167,7 @@ const CollectionTest = () => {
           setError('This collection has no questions yet.');
           return;
         }
-        setItems(combined);
+        setItems(shuffleArray(combined));
         setAnswers(Array(combined.length).fill(''));
       })
       .catch(err => {
