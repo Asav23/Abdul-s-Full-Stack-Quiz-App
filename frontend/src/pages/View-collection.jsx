@@ -69,8 +69,8 @@ const ViewCollection = () => {
       .catch(err => alert(err.message));
   };
 
-  if (error) return <Container><p>{error}</p></Container>;
-  if (!collection) return <Container><p>Loading collection...</p></Container>;
+  if (error) return <Page><Container><p>{error}</p></Container></Page>;
+  if (!collection) return <Page><Container><p>Loading collection...</p></Container></Page>;
 
   const collectionQuizzes = collection.quizzes
     .map(quizId => quizzes.find(q => q.id === quizId))
@@ -79,6 +79,7 @@ const ViewCollection = () => {
   const atLimit = collectionQuizzes.length >= MAX_QUIZZES_PER_COLLECTION;
 
   return (
+    <Page>
     <Container>
       <Header>
         <h1>{collection.name}</h1>
@@ -95,15 +96,17 @@ const ViewCollection = () => {
           {atLimit ? (
             <p>Collection is full.</p>
           ) : (
-            <div>
-              <select value={selectedQuizId} onChange={(e) => setSelectedQuizId(e.target.value)}>
+            <AddQuizRow>
+              <StyledSelect value={selectedQuizId} onChange={(e) => setSelectedQuizId(e.target.value)}>
                 <option value="">Select a quiz to add...</option>
                 {availableQuizzes.map(q => (
                   <option key={q.id} value={q.id}>{q.name}</option>
                 ))}
-              </select>
-              <SaveButton type="button" onClick={handleAddQuiz}>Add Quiz</SaveButton>
-            </div>
+              </StyledSelect>
+              <SaveButton type="button" onClick={handleAddQuiz} disabled={!selectedQuizId}>
+                Add Quiz
+              </SaveButton>
+            </AddQuizRow>
           )}
         </QuizList>
 
@@ -126,15 +129,23 @@ const ViewCollection = () => {
         )}
       </Main>
     </Container>
+    </Page>
   );
 };
 
 export default ViewCollection;
 
+const Page = styled.div`
+  background: linear-gradient(135deg, #003a63, #A50044);
+  min-height: 100vh;
+  padding: 40px 0;
+  font-family: Arial, sans-serif;
+`;
+
 const Container = styled.div`
   width: 60%;
   max-width: 800px;
-  margin: 40px auto;
+  margin: 0 auto;
   padding: 20px 30px;
   background-color: #ffffff;
   border-radius: 20px;
@@ -225,11 +236,10 @@ const TestButton = styled.button`
 const SaveButton = styled.button`
   background: #28a745;
   color: white;
-  padding: 14px 28px;
-  font-size: 1.2rem;
+  padding: 12px 28px;
+  font-size: 1.1rem;
   border: none;
   border-radius: 8px;
-  margin-top: 20px;
   cursor: pointer;
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 
@@ -237,21 +247,53 @@ const SaveButton = styled.button`
     background: #218838;
     transform: scale(1.05);
   }
+
+  &:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+    transform: none;
+  }
 `;
 
 const QuizList = styled.div`
   margin-top: 20px;
-  padding: 10px;
+  padding: 20px;
   background: #f1f1f1;
   border-radius: 10px;
 
   label {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 15px;
     font-size: 1.1rem;
+    color: #333;
+    font-weight: bold;
   }
 
   input[type="checkbox"] {
     margin-right: 10px;
+  }
+`;
+
+const AddQuizRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+`;
+
+const StyledSelect = styled.select`
+  flex: 1;
+  min-width: 220px;
+  padding: 12px 16px;
+  font-size: 1.05rem;
+  border-radius: 8px;
+  border: 2px solid #004d98;
+  background-color: #fff;
+  color: #333;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #a50044;
   }
 `;
