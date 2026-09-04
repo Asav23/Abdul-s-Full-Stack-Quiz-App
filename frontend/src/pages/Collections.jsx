@@ -36,6 +36,7 @@ const Collections = () => {
   };
 
   return (
+    <Page>
     <Container>
       <Title>Collections</Title>
       <Input
@@ -55,10 +56,17 @@ const Collections = () => {
         ))}
       </List>
     </Container>
+    </Page>
   );
 };
 
 export default Collections;
+
+const Page = styled.div`
+  background: linear-gradient(135deg, #003a63, #A50044);
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+`;
 
 const Container = styled.div`
   padding: 30px;

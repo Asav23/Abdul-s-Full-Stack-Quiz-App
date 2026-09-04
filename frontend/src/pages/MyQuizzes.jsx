@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { API_BASE_URL } from '../api';
 
+const Page = styled.div`
+  background: linear-gradient(135deg, #003a63, #A50044);
+  color: #fff;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+`;
+
 const QuizContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -185,7 +192,7 @@ const MyQuizzes = () => {
   };
 
   return (
-    <>
+    <Page>
       <QuizContainer>
         {quizzes.length === 0 ? (
           <p>No quizzes found. Create a new quiz to get started!</p>
@@ -229,7 +236,7 @@ const MyQuizzes = () => {
           </ModalContent>
         </Modal>
       )}
-    </>
+    </Page>
   );
 };
 
