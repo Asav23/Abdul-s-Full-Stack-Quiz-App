@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { API_BASE_URL } from '../api';
+import { shuffleArray } from '../shuffle';
 
 const Page = styled.div`
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -128,50 +129,62 @@ const Test = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const [results, setResults] = useState(null);
+  const [isFullRound, setIsFullRound] = useState(true);
 
   const quizId = new URLSearchParams(location.search).get('quizId');
+
+  const startRound = (questions, isFull) => {
+    setShuffled(shuffleArray(questions));
+    setAnswers(Array(questions.length).fill(''));
+    setCurrentIndex(0);
+    setResults(null);
+    setIsFullRound(isFull);
+  };
 
   useEffect(() => {
     fetch(`${API_BASE_URL}/api/quizzes/${quizId}`)
       .then(res => res.json())
       .then(data => {
         setQuiz(data);
-        const shuffledQs = shuffleArray(data.questions.map((q, i) => ({ ...q, index: i })));
-        setShuffled(shuffledQs);
-        setAnswers(Array(data.questions.length).fill(''));
+        startRound(data.questions, true);
       })
       .catch(() => navigate('/my-quizzes'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [quizId, navigate]);
-
-  const shuffleArray = (arr) => {
-    const shuffled = [...arr];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
 
   const handleChange = (val) => {
     const copy = [...answers];
-    copy[shuffled[currentIndex].index] = val;
+    copy[currentIndex] = val;
     setAnswers(copy);
   };
 
   const handleSubmit = () => {
-    const incorrect = quiz.questions.map((q, i) => {
-      const userAnswer = answers[i];
-      const correctAnswer = q.answer;
-      return userAnswer.trim().toLowerCase() !== correctAnswer.trim().toLowerCase()
-        ? { question: q.question, userAnswer, correctAnswer }
-        : null;
-    }).filter(Boolean);
+    const graded = shuffled.map((q, i) => {
+      const userAnswer = answers[i] || '';
+      const wasCorrect = userAnswer.trim().toLowerCase() === q.answer.trim().toLowerCase();
+      return { question: q.question, answer: q.answer, userAnswer, wasCorrect };
+    });
+    const incorrect = graded.filter(g => !g.wasCorrect);
 
     setResults({
-      total: quiz.questions.length,
-      correct: quiz.questions.length - incorrect.length,
+      total: graded.length,
+      correct: graded.length - incorrect.length,
       incorrect,
     });
+
+    if (isFullRound) {
+      fetch(`${API_BASE_URL}/api/quizzes/${quizId}/attempts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answers: graded }),
+      }).catch(err => console.error('Failed to record attempt:', err));
+    }
+  };
+
+  const retryFullQuiz = () => startRound(quiz.questions, true);
+
+  const practiceMissed = () => {
+    startRound(results.incorrect.map(q => ({ question: q.question, answer: q.answer })), false);
   };
 
   if (!quiz) return <Page><p>Loading...</p></Page>;
@@ -185,17 +198,26 @@ const Test = () => {
           <Results>
             <Percentage>Your score: {(results.correct / results.total * 100).toFixed(2)}%</Percentage>
             <Score>You got {results.correct} out of {results.total} correct.</Score>
-            <IncorrectList>
-              {results.incorrect.map((q, i) => (
-                <li key={i}>
-                  <strong>Q:</strong> {q.question}<br />
-                  <strong>Your Answer:</strong> {q.userAnswer}<br />
-                  <strong>Correct Answer:</strong> {q.correctAnswer}
-                </li>
-              ))}
-            </IncorrectList>
+            {results.incorrect.length === 0 ? (
+              <p>Nice, no mistakes this round.</p>
+            ) : (
+              <IncorrectList>
+                {results.incorrect.map((q, i) => (
+                  <li key={i}>
+                    <strong>Q:</strong> {q.question}<br />
+                    <strong>Your Answer:</strong> {q.userAnswer}<br />
+                    <strong>Correct Answer:</strong> {q.answer}
+                  </li>
+                ))}
+              </IncorrectList>
+            )}
             <NavRow>
-              <Button onClick={() => navigate(`/test?quizId=${quiz.id}`)}>Retry</Button>
+              {results.incorrect.length > 0 && (
+                <Button onClick={practiceMissed}>
+                  Practice Missed Questions ({results.incorrect.length})
+                </Button>
+              )}
+              <Button onClick={retryFullQuiz}>Retry Full Quiz</Button>
               <Button onClick={() => navigate('/my-quizzes')}>Quit</Button>
             </NavRow>
           </Results>
@@ -208,7 +230,7 @@ const Test = () => {
             <QuestionText>{shuffled[currentIndex].question}</QuestionText>
             <Input
               type="text"
-              value={answers[shuffled[currentIndex].index] || ''}
+              value={answers[currentIndex] || ''}
               onChange={(e) => handleChange(e.target.value)}
               placeholder="Your answer"
             />
