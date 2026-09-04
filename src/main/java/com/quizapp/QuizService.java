@@ -59,7 +59,22 @@ public void updatequiz(Long id, Quiz updateQuiz){
 validateQuestionCount(updateQuiz);
 Quiz quiz = getQuizById(id);
 quiz.setName(updateQuiz.getName());
-quiz.setQuestions(updateQuiz.getQuestions());
+
+// orphanRemoval requires mutating the existing managed collection in place -
+// replacing it with a new List instance makes Hibernate throw
+// "A collection with orphan deletion was no longer referenced".
+List<Question> existingQuestions = quiz.getQuestions();
+existingQuestions.clear();
+
+List<Question> newQuestions = updateQuiz.getQuestions();
+if (newQuestions != null) {
+    for (Question question : newQuestions) {
+        question.setId(null);
+        question.setQuiz(quiz);
+        existingQuestions.add(question);
+    }
+}
+
 quizRepository.save(quiz);
 
 

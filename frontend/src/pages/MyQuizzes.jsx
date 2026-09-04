@@ -208,7 +208,7 @@ const MyQuizzes = () => {
                   </QuestionAnswerItem>
                 ))}
               </QuestionAnswerList>
-              <Button onClick={() => navigate(`/full-quiz?quizId=${quiz.id}`)}>
+              <Button onClick={() => navigate(`/create-quiz?quizId=${quiz.id}`)}>
                 {quiz.questions.length > 5 ? 'See Full Quiz' : 'Edit Quiz'}
               </Button>
               <MultipleChoiceButton href={`/test?quizId=${quiz.id}`}>Test Now</MultipleChoiceButton>

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import { API_BASE_URL } from '../api';
 
@@ -110,8 +111,35 @@ const Numbering = styled.div`
 const MAX_QUESTIONS = 35;
 
 const CreateQuiz = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const quizId = new URLSearchParams(location.search).get('quizId');
+  const isEditMode = Boolean(quizId);
+
   const [quizName, setQuizName] = useState('');
   const [questions, setQuestions] = useState([{ question: '', answer: '' }]);
+  const [loading, setLoading] = useState(isEditMode);
+
+  useEffect(() => {
+    if (!isEditMode) return;
+
+    fetch(`${API_BASE_URL}/api/quizzes/${quizId}`)
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load quiz');
+        return res.json();
+      })
+      .then(data => {
+        setQuizName(data.name);
+        setQuestions(data.questions.map(q => ({ question: q.question, answer: q.answer })));
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        alert('Could not load that quiz.');
+        navigate('/my-quizzes');
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [quizId]);
 
   const handleAddQuestion = () => {
     if (questions.length >= MAX_QUESTIONS) return;
@@ -150,14 +178,17 @@ const CreateQuiz = () => {
     };
 
     try {
-      const res = await fetch(`${API_BASE_URL}/api/quizzes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(quiz),
-      });
+      const res = await fetch(
+        isEditMode ? `${API_BASE_URL}/api/quizzes/${quizId}` : `${API_BASE_URL}/api/quizzes`,
+        {
+          method: isEditMode ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(quiz),
+        }
+      );
 
       if (!res.ok) throw new Error('Failed to save quiz.');
-      alert('Quiz saved successfully!');
+      alert(isEditMode ? 'Quiz updated successfully!' : 'Quiz saved successfully!');
       window.location.href = '/my-quizzes';
     } catch (err) {
       console.error(err);
@@ -165,10 +196,20 @@ const CreateQuiz = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <PageWrapper>
+        <Container>
+          <p>Loading quiz...</p>
+        </Container>
+      </PageWrapper>
+    );
+  }
+
   return (
     <PageWrapper>
       <Container>
-        <HeaderTitle>Create Your Quiz</HeaderTitle>
+        <HeaderTitle>{isEditMode ? 'Edit Quiz' : 'Create Your Quiz'}</HeaderTitle>
         <StyledForm onSubmit={handleSubmit}>
           <TextInput
             type="text"
@@ -203,7 +244,7 @@ const CreateQuiz = () => {
           {questions.length < MAX_QUESTIONS && (
             <Button type="button" onClick={handleAddQuestion}>Add Question</Button>
           )}
-          <Button type="submit">Save Quiz</Button>
+          <Button type="submit">{isEditMode ? 'Save Changes' : 'Save Quiz'}</Button>
         </StyledForm>
 
         <LinkButton href="/my-quizzes">Go to My Quizzes</LinkButton>
