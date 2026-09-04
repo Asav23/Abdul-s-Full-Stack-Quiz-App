@@ -53,6 +53,12 @@ const QuizName = styled.div`
   font-weight: bold;
 `;
 
+const HighScore = styled.div`
+  font-size: 0.85em;
+  color: #ffcb05;
+  margin-bottom: 10px;
+`;
+
 const QuestionAnswerList = styled.div`
   margin-bottom: 15px;
 `;
@@ -200,6 +206,9 @@ const MyQuizzes = () => {
           quizzes.map((quiz, index) => (
             <QuizBox key={quiz.id}>
               <QuizName>{index + 1}. {quiz.name}</QuizName>
+              <HighScore>
+                {quiz.highScore != null ? `High Score: ${Math.round(quiz.highScore)}%` : 'Not attempted yet'}
+              </HighScore>
               <QuestionAnswerList>
                 {quiz.questions.slice(0, 5).map((q, i) => (
                   <QuestionAnswerItem key={i}>
