@@ -26,6 +26,14 @@ public class Quiz {
 
     private Double highScore;
 
+    // Soft delete: "default false" at the SQL level (not just the Java field
+    // default) matters here - when this column is added to the existing
+    // table via ddl-auto=update, every already-existing quiz needs to
+    // backfill to false, not NULL, or it silently vanishes from
+    // findByDeletedFalse().
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean deleted = false;
+
     // Constructors
     public Quiz() {}
 
@@ -74,5 +82,13 @@ public class Quiz {
 
     public void setHighScore(Double highScore) {
         this.highScore = highScore;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 }

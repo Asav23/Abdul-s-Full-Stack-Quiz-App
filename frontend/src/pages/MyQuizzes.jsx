@@ -18,6 +18,22 @@ const QuizContainer = styled.div`
   justify-content: center;
 `;
 
+const TopBar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px 40px 0;
+`;
+
+const DeletedLink = styled.a`
+  color: #ffcb05;
+  text-decoration: underline;
+  font-size: 0.95em;
+
+  &:hover {
+    color: #e0b904;
+  }
+`;
+
 const QuizBox = styled.div`
   background: linear-gradient(135deg, #a50044, #004d98);
   border-radius: 15px;
@@ -199,6 +215,9 @@ const MyQuizzes = () => {
 
   return (
     <Page>
+      <TopBar>
+        <DeletedLink href="/deleted-quizzes">Recently Deleted</DeletedLink>
+      </TopBar>
       <QuizContainer>
         {quizzes.length === 0 ? (
           <p>No quizzes found. Create a new quiz to get started!</p>
@@ -237,7 +256,7 @@ const MyQuizzes = () => {
         <Modal>
           <ModalContent>
             <Close onClick={() => setShowModal(false)}>&times;</Close>
-            <p>Are you sure you want to delete this quiz?</p>
+            <p>Are you sure you want to delete this quiz? You can restore it later from Recently Deleted.</p>
             <ModalButtons>
               <Button onClick={() => deleteQuiz(quizIdToDelete)}>Yes, Delete</Button>
               <Button onClick={() => setShowModal(false)}>Cancel</Button>

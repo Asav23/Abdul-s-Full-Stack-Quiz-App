@@ -24,6 +24,11 @@ public class QuizController {
 
 }
 
+@GetMapping("/deleted")
+    public List<Quiz> getDeletedQuizzes(){
+        return quizService.getDeletedQuizzes();
+}
+
 
 @GetMapping("/{id}") // get id
     public  Quiz getQuizById(@PathVariable Long id){
@@ -47,6 +52,16 @@ return quizService.getQuizById(id);
 
 
 
+}
+
+@PostMapping("/{id}/restore")
+    public void restoreQuiz(@PathVariable Long id){
+        quizService.restorequiz(id);
+}
+
+@DeleteMapping("/{id}/purge")
+    public void purgeQuiz(@PathVariable Long id){
+        quizService.purgequiz(id);
 }
 
 

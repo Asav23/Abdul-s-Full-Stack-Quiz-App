@@ -14,17 +14,24 @@ public class QuizService {
 
     private final QuizRepository quizRepository;
     private final CollectionRepository collectionRepository;
+    private final QuizAuditLogRepository auditLogRepository;
 
-    public QuizService(QuizRepository quizRepository, CollectionRepository collectionRepository){
+    public QuizService(QuizRepository quizRepository, CollectionRepository collectionRepository,
+                        QuizAuditLogRepository auditLogRepository){
        this.quizRepository = quizRepository;
        this.collectionRepository = collectionRepository;
+       this.auditLogRepository = auditLogRepository;
     }
 
 
 
 
    public List<Quiz> getAllQuizzes(){
-return quizRepository.findAll();
+return quizRepository.findByDeletedFalse();
+}
+
+public List<Quiz> getDeletedQuizzes() {
+    return quizRepository.findByDeletedTrue();
 }
 
 
@@ -36,7 +43,9 @@ public Quiz createquiz(Quiz quiz) {
             question.setQuiz(quiz);
         }
     }
-    return quizRepository.save(quiz);
+    Quiz saved = quizRepository.save(quiz);
+    logAction(saved, QuizAuditLog.Action.CREATED);
+    return saved;
 }
 
 private void validateQuestionCount(Quiz quiz) {
@@ -48,9 +57,24 @@ private void validateQuestionCount(Quiz quiz) {
 
 public void deletequiz(Long id){
     Quiz quiz = getQuizById(id);
+    quiz.setDeleted(true);
+    quizRepository.save(quiz);
+    logAction(quiz, QuizAuditLog.Action.DELETED);
+}
 
-    // A quiz can belong to collections via the collection_quizzes join table;
-    // deleting it outright would violate that foreign key, so drop its
+public void restorequiz(Long id) {
+    Quiz quiz = getQuizById(id);
+    quiz.setDeleted(false);
+    quizRepository.save(quiz);
+    logAction(quiz, QuizAuditLog.Action.RESTORED);
+}
+
+public void purgequiz(Long id) {
+    Quiz quiz = getQuizById(id);
+
+    // Only reachable here, not from the normal delete flow anymore: a quiz
+    // can belong to collections via the collection_quizzes join table, and
+    // actually removing the row would violate that foreign key, so drop its
     // membership from any collection first.
     List<Collection> collections = collectionRepository.findByQuizzesContaining(quiz);
     for (Collection collection : collections) {
@@ -85,8 +109,13 @@ if (newQuestions != null) {
 }
 
 quizRepository.save(quiz);
+logAction(quiz, QuizAuditLog.Action.UPDATED);
 
 
+}
+
+private void logAction(Quiz quiz, QuizAuditLog.Action action) {
+    auditLogRepository.save(new QuizAuditLog(quiz.getId(), quiz.getName(), action));
 }
 
 ///  get Quiz include main class
