@@ -36,3 +36,6 @@ build/
 /frontend/node_modules/
 /frontend/build/
 /frontend/.cache/
+
+# Local database backups (personal data, produced by scripts/backup.ps1)
+/backups/

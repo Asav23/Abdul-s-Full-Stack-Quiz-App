@@ -35,3 +35,15 @@ Requires only Docker and Docker Compose - no local Java, Maven, or Node install 
 Then open http://localhost:3000 in a browser. Quizzes are stored in a Postgres database in a Docker volume, so they persist across restarts (`docker-compose down` keeps the data, `docker-compose down -v` wipes it).
 
 The backend API is reachable directly at http://localhost:8080/api/quizzes, and its health check at http://localhost:8080/actuator/health.
+
+Backing up your data
+
+Quiz data only exists in a local Docker volume - there's no cloud copy. `docker-compose down -v`, a Docker reset, or a host disk failure would wipe it with no way back, so back up before anything risky:
+
+    .\scripts\backup.ps1
+
+Writes a timestamped .sql snapshot to `backups\` (gitignored - it's your personal data, not something to commit). To restore one:
+
+    .\scripts\restore.ps1 -BackupFile .\backups\quizzer-backup-2026-09-05_120000.sql
+
+Restoring overwrites whatever is currently in the database, so it asks for confirmation first.
