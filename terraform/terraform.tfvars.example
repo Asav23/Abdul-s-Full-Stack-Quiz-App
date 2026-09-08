@@ -1,0 +1,8 @@
+# Copy this file to terraform.tfvars and fill in your own values.
+# terraform.tfvars is gitignored - never commit your real values.
+
+aws_region         = "eu-west-1"
+instance_type      = "t3.micro"
+db_instance_class  = "db.t3.micro"
+budget_alert_email = "you@example.com"
+budget_limit_usd   = "1"
